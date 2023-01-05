@@ -1,31 +1,46 @@
 import node as ND
-import utils as utils
-
+import utils as UTL
 
 
 class BDD:
 
     def __init__(self):
-        self.vals = [False, False, False, False]
-        self.asciis = ['a', 'b', 'c', 'd']
+        parsedData = UTL.parseExp()
+        self.asciis: list[str] = parsedData[0]
+        self.orders: list[str] = parsedData[1]
+        self.vals = [False for _ in range(len(self.asciis))]
         self.root = ND.Node(self.asciis[0])
         self.construct(self.root, 0)
 
+    def calcLogic(self, exp1: bool, and0Or1: int, exp2: bool) -> bool:
+        if and0Or1 == 0:
+            return exp1 and exp2
+        elif and0Or1 == 1:
+            return exp1 or exp2
+
     def expExcute(self):
-        #defining the expression here
-        a = utils.calcLogic(self.vals[0], 0, self.vals[1])
-        b = utils.calcLogic(not self.vals[0], 0, self.vals[2])
-        c = utils.calcLogic(self.vals[1], 0, self.vals[3])
-        d = utils.calcLogic(self.vals[1], 0, self.vals[2])
-        aOrb = utils.calcLogic(a, 1, b)
-        cOrd = utils.calcLogic(c, 1, d)
-        return utils.calcLogic(aOrb, 1, cOrd)
+        res = False
+        for ord in self.orders:
+            x = [*ord]
+            notFlag = False
+            curr = True
+            for i in range(len(x)):
+                if x[i] == '!':
+                    notFlag = True
+                    continue
+                if notFlag:
+                    curr = self.calcLogic(
+                        curr, 0, not self.vals[self.asciis.index(x[i])])
+                    notFlag = False
+                else:
+                    curr = self.calcLogic(
+                        curr, 0, self.vals[self.asciis.index(x[i])])
+            res = self.calcLogic(res, 1, curr)
+        return res
 
     def setVar(self, position, value):
         self.vals[position] = value
         return
-
-    
 
     def construct(self, curr: ND.Node, pos):
         if ((curr.asci == '0') or (curr.asci == '1')):
@@ -61,7 +76,6 @@ class BDD:
                 curr.asci = '0'
             return
         return 0
-
 
     def printGraph(self, myRoot: ND.Node):
         if ((myRoot.asci == '0') or (myRoot.asci == '1')):

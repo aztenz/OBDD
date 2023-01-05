@@ -1,6 +1,34 @@
+import string
+import re
 
-def calcLogic(exp1: bool, and0Or1: int, exp2: bool) -> bool:
-    if and0Or1 == 0:
-        return exp1 and exp2
-    elif and0Or1 == 1:
-        return exp1 or exp2
+
+def getVars(expression: str) -> list:
+
+    expression = expression.replace(
+        ' ', '').replace(
+            '!', '').replace(
+                '+', '')
+    
+    varsList = [*expression]
+    res = list(set(varsList))
+    res.sort()
+    return res
+
+
+def getRules(expression: str) -> list:
+    expression = expression.replace(
+        ' ', '')
+    return expression.split('+')
+
+
+def parseExp() -> list:
+    exp: str = input(
+        "Enter your expression in the form (a + !b + a!b!c + ... ):")
+    parseCheck = re.match(
+        '^([A-Za-z]|![A-Za-z])+( \+ {1}([A-Za-z]|![A-Za-z])+)*$', exp)
+    while (not parseCheck):
+        print("\nExpression syntax Error!\n")
+        exp = input("Please Enter your expression again:")
+        parseCheck = re.match(
+            '^([A-Za-z]|![A-Za-z])+( \+ {1}([A-Za-z]|![A-Za-z])+)*$', exp)
+    return [getVars(exp), getRules(exp)]
